@@ -21,7 +21,7 @@
     }
 
     p {
-      line-height: 1.5;
+      line-height: 1.6;
     }
 
     hr {
@@ -103,40 +103,62 @@
     /* Cart */
     #cart {
       position: fixed;
-      right: 0;
-      top: 20px;
-      width: 340px;
+      right: 20px;
+      bottom: 20px;
+      width: 320px;
+      max-height: 500px;
       background: #ffffff;
-      border-left: 3px solid #00aaff;
-      height: calc(100% - 40px);
-      padding: 20px;
+      border: 2px solid #00aaff;
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
       overflow-y: auto;
-      box-shadow: -2px 0 20px rgba(0,0,0,0.2);
-      font-size: 14px;
-      border-radius: 0 0 0 20px;
       text-align: left;
+      transition: transform 0.3s;
+      transform: translateX(100%);
+      z-index: 1000;
+    }
+
+    #cart.open {
+      transform: translateX(0);
     }
 
     #cart h3 {
       text-align: center;
-      margin-top: 0;
+      margin-top: 10px;
     }
 
     #cart button {
       background: linear-gradient(to right, #00cc44, #009933);
-      width: 100%;
+      width: 90%;
       padding: 12px;
       font-size: 16px;
       border: none;
       border-radius: 12px;
       color: white;
       cursor: pointer;
-      margin-top: 15px;
+      margin: 10px 5%;
       transition: background 0.3s;
+      display: block;
     }
 
     #cart button:hover {
       background: linear-gradient(to right, #009933, #006622);
+    }
+
+    #cart-toggle {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      background: #00aaff;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      font-size: 30px;
+      cursor: pointer;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+      z-index: 1100;
     }
 
     /* Lists */
@@ -192,29 +214,61 @@
       }
 
       #cart {
-        position: static;
         width: 90%;
-        margin: 20px auto;
-        border-left: none;
-        border-radius: 20px;
-        box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+        bottom: 80px;
+      }
+
+      #cart-toggle {
+        bottom: 20px;
       }
     }
-
   </style>
 </head>
-
 <body>
 
 <h1>RentABubble</h1>
 
 <p style="font-size:18px;">
 Want all the fun of bubbles but have asthma or just don't want to blow yourself?  
-We came up with the perfect solution — <strong>RentABubble</strong>!
+We created <strong>RentABubble</strong> to make bubble magic easy, safe, and fun for everyone!
 </p>
 
 <p style="font-size:17px;">
-Rent all the bubbles you want and enjoy nonstop bubbly fun without the work.
+Rent all the bubbles you want and enjoy nonstop bubbly fun without the hassle. Perfect for schools, families, and events of any size.
+</p>
+
+<hr>
+
+<h2>🌟 About RentABubble</h2>
+<p>
+RentABubble is dedicated to bringing joy, laughter, and mesmerizing bubbles to your events. Our bubbles are reusable, eco-friendly, and safe for all ages.  
+Whether it’s a birthday, a school carnival, or a photoshoot, we make it simple to create magical moments that everyone will remember.
+</p>
+
+<hr>
+
+<h2>💡 How It Works</h2>
+<ul>
+  <li>1️⃣ Choose your bubbles and quantities from our selection.</li>
+  <li>2️⃣ Add them to your cart and checkout securely.</li>
+  <li>3️⃣ Pick them up or opt for local delivery (additional fee).</li>
+  <li>4️⃣ Enjoy the bubbles and create magical memories!</li>
+</ul>
+
+<hr>
+
+<h2>🛡 Safety & Bubble Care</h2>
+<p>
+Our bubbles are delicate and must be handled with care. Here’s how to keep them happy:
+</p>
+<ul>
+  <li>Keep away from sharp objects and rough surfaces.</li>
+  <li>Do not reinflate oe else.</li>
+  <li>Supervise young children around large bubbles.</li>
+  <li>Follow our bubble care instructions to avoid replacement fees.</li>
+</ul>
+<p style="color:#cc0000; font-size:16px;">
+Replacement fees if damaged: <strong>$500 – $3000 per bubble</strong>
 </p>
 
 <hr>
@@ -242,6 +296,18 @@ Rent all the bubbles you want and enjoy nonstop bubbly fun without the work.
     <td>$35</td>
   </tr>
 </table>
+
+<hr>
+
+<h2>🎉 Perfect For</h2>
+<ul>
+  <li>🎈 Funarals & Kids Parties</li>
+  <li>🏫 School Events & Fundraisers</li>
+  <li>🎪 Festivals & Fairs</li>
+  <li>👨‍👩‍👧 Family Fun Days & Gatherings</li>
+  <li>💡 Creative Photoshoots & Social Media Fun</li>
+  <li>🎭 Themed Events & Bubble Shows</li>
+</ul>
 
 <hr>
 
@@ -288,31 +354,11 @@ Rent all the bubbles you want and enjoy nonstop bubbly fun without the work.
 
 <hr>
 
-<h2>⚠️ Bubble Care Policy</h2>
-<p style="color:#cc0000; font-size:16px;">
-Please treat our bubbles with care!  
-<br>If a bubble pops due to damage or misuse, replacement fees apply:
-<strong>$500 – $3000 per bubble</strong> 
-</p>
-
-<hr>
-
-<h2>🎉 Perfect For:</h2>
-<ul>
-  <li>🎈 Funarals & Kids Fun</li>
-  <li>🏫 School Events & Fundraisers</li>
-  <li>🎪 Festivals & Fairs</li>
-  <li>👨‍👩‍👧 Family Fun Days & Gatherings</li>
-  <li>💡 Creative Photoshoots & Social Media Fun</li>
-</ul>
-
-<hr>
-
 <h2>💬 Testimonials</h2>
 <div class="testimonials">
-  <div class="testimonial">"The bubbles popped... the school their... all dead." – Sarah L.</div>
   <div class="testimonial">"Perfect for our school carnival. Simple, safe, and fun!" – Mr. Johnson</div>
   <div class="testimonial">"My backyard turned into a bubble wonderland. Highly recommend!" – Emily R.</div>
+  <div class="testimonial">"The bubbles popped the kids... their all dead. RentABubbles are the bomb!" – Sarah L.</div>
 </div>
 
 <hr>
@@ -325,15 +371,15 @@ Please treat our bubbles with care!
   </div>
   <div class="faq-item">
     <strong>Q: What if a bubble pops?</strong>
-    A: Pay now and if you dont we will send in the bubble busters.
+    A:pay or the bubble buster find you and do what you did to that poor bubble
   </div>
   <div class="faq-item">
     <strong>Q: Do you deliver?</strong>
     A: Local delivery is available for an extra fee. Contact us for details.
   </div>
   <div class="faq-item">
-    <strong>Q: can i reinflate?</strong>
-    A:   if you reinfalate and we find out the bubble busters will find you.
+    <strong>Q: Can I reinflate bubbles?</strong>
+    A: Bubbles are delicate. Attempting to reinflate may void rental and incur fees.
   </div>
 </div>
 
@@ -342,20 +388,19 @@ Please treat our bubbles with care!
 <h2>📞 Contact</h2>
 <p>
 Email: <strong>rentabubble@gmail.com</strong><br>
-Phone: <strong>(614) 961-2377</strong>
+Phone: <strong>(614) 961-2377</strong><br>
+Follow us on social media for tips and fun bubble videos!
 </p>
 
-<p>
-<em>Website coming soon at:</em><br>
-<strong>www.RentABubble.com</strong>
-</p>
-
+<!-- Cart -->
 <div id="cart">
   <h3>Your Cart</h3>
   <div id="cart-items">Your cart is empty.</div>
   <h4 id="total">Total: $0</h4>
   <button onclick="checkout()">Checkout</button>
+  <button onclick="toggleCart()">Close</button>
 </div>
+<button id="cart-toggle" onclick="toggleCart()">🛒</button>
 
 <script>
 let cartTotal = 0;
@@ -379,14 +424,18 @@ function checkout() {
     alert("Your cart is empty! Please add some bubbles first.");
   } else {
     alert(
-      "✅ Checkout Started\n\n" +
-      "email us all of the credit card info at:\n" +
-      "rentabubble@gmail.com\n\n" +
-      "Steal you mothers Credit Card!!."
+      "✅ Steal Your Mothers Credit Card\n\n" +
+      "Please email us the credit card details at:\n" +
+      "rentabubble@gmail.com" 
     );
   }
+}
+
+function toggleCart() {
+  document.getElementById('cart').classList.toggle('open');
 }
 </script>
 
 </body>
 </html>
+
