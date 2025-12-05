@@ -415,43 +415,27 @@ function addToCart(name, price, qtyId) {
     cartItems.innerHTML = '';
   }
 
-  cartItems.innerHTML += `<p>✅ ${quantity} x ${name} - $${cost}</p>`;
-  document.getElementById('total').innerText = "Total: $" + cartTotal;
-}
+  // Create new cart item element
+  let newItem = document.createElement('p');
+  newItem.innerHTML = `✅ ${quantity} x ${name} - $${cost}`;
+  cartItems.appendChild(newItem);
 
-function checkout() {
-  if (cartTotal === 0) {
-    alert("Your cart is empty! Please add some bubbles first.");
-  } else {
-    alert(
-      "✅ Steal Your Mothers Credit Card\n\n" +
-      "Please email us the credit card details at:\n" +
-      "rentabubble@gmail.com" 
-    );
-  }
-}
-
-<script>
-let cartTotal = 0;
-
-function addToCart(name, price, qtyId) {
-  let quantity = Number(document.getElementById(qtyId).value);
-  let cost = price * quantity;
-  cartTotal += cost;
-
-  let cartItems = document.getElementById('cart-items');
-  if (cartItems.innerHTML === "Your cart is empty.") {
-    cartItems.innerHTML = '';
-  }
-
-  cartItems.innerHTML += `<p>✅ ${quantity} x ${name} - $${cost}</p>`;
   document.getElementById('total').innerText = "Total: $" + cartTotal;
 
-  // Open the cart if it's not already open
+  // Open the cart automatically
   let cart = document.getElementById('cart');
   if (!cart.classList.contains('open')) {
     cart.classList.add('open');
   }
+
+  // Scroll to the newly added item
+  newItem.scrollIntoView({ behavior: 'smooth', block: 'end' });
+
+  // Optional: briefly highlight the new item
+  newItem.style.backgroundColor = '#d4ffd4';
+  setTimeout(() => {
+    newItem.style.backgroundColor = '';
+  }, 800);
 }
 
 function checkout() {
@@ -466,6 +450,10 @@ function checkout() {
   }
 }
 
+function toggleCart() {
+  document.getElementById('cart').classList.toggle('open');
+}
+</script>
 function toggleCart() {
   document.getElementById('cart').classList.toggle('open');
 }
