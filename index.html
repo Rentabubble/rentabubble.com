@@ -13,9 +13,7 @@
       text-align: center;
     }
 
-    h1 {
-      color: #00aaff;
-    }
+    h1 { color: #00aaff; }
 
     hr {
       margin: 30px 0;
@@ -23,7 +21,6 @@
       border-top: 1px solid #ccc;
     }
 
-    /* Bubble Rental UI */
     .container {
       display: flex;
       flex-wrap: wrap;
@@ -41,9 +38,7 @@
       text-align: center;
     }
 
-    .bubble-card h2 {
-      color: #00aaff;
-    }
+    .bubble-card h2 { color: #00aaff; }
 
     .bubble-card button {
       background: #00aaff;
@@ -60,7 +55,6 @@
       background: #0088cc;
     }
 
-    /* Cart */
     #cart {
       position: fixed;
       right: 0;
@@ -143,21 +137,24 @@ You can rent all the bubbles you want and enjoy nonstop bubbly fun without the w
 
 <hr>
 
-<!-- Bubble Rental UI -->
 <h2>🛒 Rent Bubbles</h2>
 <div class="container">
 
   <div class="bubble-card">
     <h2>1-Day Bubble</h2>
     <p>Price: $5 per bubble</p>
-    <label>Quantity: <input type="number" id="dayQty" value="1" min="1" style="width:50px;"></label>
+    <label>Quantity:
+      <input type="number" id="dayQty" value="1" min="1" style="width:50px;">
+    </label>
     <button onclick="addToCart('1-Day Bubble', 5, 'dayQty')">Add to Cart</button>
   </div>
 
   <div class="bubble-card">
     <h2>Weekend Bubble</h2>
     <p>Price: $10 per bubble</p>
-    <label>Quantity: <input type="number" id="weekendQty" value="1" min="1" style="width:50px;"></label>
+    <label>Quantity:
+      <input type="number" id="weekendQty" value="1" min="1" style="width:50px;">
+    </label>
     <button onclick="addToCart('Weekend Bubble', 10, 'weekendQty')">Add to Cart</button>
   </div>
 
@@ -188,7 +185,7 @@ If a bubble pops due to damage or misuse, replacement fees apply:
 
 <h2>📞 Contact</h2>
 <p>
-Email: <strong>rentabubble@email.com</strong><br>
+Email: <strong>rentabubble@gmail.com</strong><br>
 Phone: <strong>(555) 123-4567</strong>
 </p>
 
@@ -197,12 +194,11 @@ Phone: <strong>(555) 123-4567</strong>
 <strong>www.RentABubble.com</strong>
 </p>
 
-<!-- Cart Sidebar -->
 <div id="cart">
   <h3>Your Cart</h3>
   <div id="cart-items">Your cart is empty.</div>
   <h4 id="total">Total: $0</h4>
-  <button onclick="checkout()">Checkout (Demo)</button>
+  <button onclick="checkout()">Checkout</button>
 </div>
 
 <script>
@@ -223,16 +219,12 @@ function addToCart(name, price, qtyId) {
 }
 
 function checkout() {
-  alert("Checkout Demo Only!\nYour total is $" + cartTotal + "\n\nTo accept real payments, integrate PayPal or Stripe.");
-}
-</script>
-<script>
-function checkout() {
   alert(
-    "To complete your RentABubble order:\n\n" +
-    "Please email us at rentabubble@gmail.com to receive a secure payment link.\n\n" +
-    "⚠️ Never send credit card numbers by email.\n" +
-    "We will provide a safe checkout option for you."
+    "✅ Checkout Started\n\n" +
+    "To complete your order, email us at:\n" +
+    "rentabubble@gmail.com\n\n" +
+    "We will send you a secure payment link.\n\n" +
+    "⚠️ Never send credit card numbers by email."
   );
 }
 </script>
