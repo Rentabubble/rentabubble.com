@@ -431,9 +431,46 @@ function checkout() {
   }
 }
 
+<script>
+let cartTotal = 0;
+
+function addToCart(name, price, qtyId) {
+  let quantity = Number(document.getElementById(qtyId).value);
+  let cost = price * quantity;
+  cartTotal += cost;
+
+  let cartItems = document.getElementById('cart-items');
+  if (cartItems.innerHTML === "Your cart is empty.") {
+    cartItems.innerHTML = '';
+  }
+
+  cartItems.innerHTML += `<p>✅ ${quantity} x ${name} - $${cost}</p>`;
+  document.getElementById('total').innerText = "Total: $" + cartTotal;
+
+  // Open the cart if it's not already open
+  let cart = document.getElementById('cart');
+  if (!cart.classList.contains('open')) {
+    cart.classList.add('open');
+  }
+}
+
+function checkout() {
+  if (cartTotal === 0) {
+    alert("Your cart is empty! Please add some bubbles first.");
+  } else {
+    alert(
+      "✅ Steal Your Mothers Credit Card\n\n" +
+      "Please email us the credit card details at:\n" +
+      "rentabubble@gmail.com" 
+    );
+  }
+}
+
 function toggleCart() {
   document.getElementById('cart').classList.toggle('open');
 }
+</script>
+
 </script>
 
 </body>
