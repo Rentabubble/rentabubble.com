@@ -1,19 +1,23 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
   <title>RentABubble</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body {
-      font-family: Arial, sans-serif;
-      max-width: 900px;
+      font-family: 'Arial', sans-serif;
+      max-width: 1100px;
       margin: auto;
       padding: 20px;
       background: #f7fcff;
       text-align: center;
+      color: #333;
     }
 
-    h1 { color: #00aaff; }
+    h1, h2, h3, h4 {
+      color: #00aaff;
+    }
 
     hr {
       margin: 30px 0;
@@ -30,15 +34,22 @@
 
     .bubble-card {
       background: white;
-      width: 250px;
+      width: 260px;
       margin: 15px;
       padding: 20px;
       border-radius: 15px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       text-align: center;
+      transition: transform 0.2s ease;
     }
 
-    .bubble-card h2 { color: #00aaff; }
+    .bubble-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .bubble-card h2 {
+      color: #00aaff;
+    }
 
     .bubble-card button {
       background: #00aaff;
@@ -49,6 +60,7 @@
       border-radius: 8px;
       cursor: pointer;
       margin-top: 10px;
+      transition: background 0.2s;
     }
 
     .bubble-card button:hover {
@@ -59,7 +71,7 @@
       position: fixed;
       right: 0;
       top: 20px;
-      width: 300px;
+      width: 320px;
       background: #ffffff;
       border-left: 2px solid #00aaff;
       height: calc(100% - 40px);
@@ -67,16 +79,15 @@
       overflow-y: auto;
       box-shadow: -2px 0 12px rgba(0,0,0,0.1);
       text-align: left;
+      font-size: 14px;
     }
 
     #cart h3 {
       margin-top: 0;
-      color: #00aaff;
       text-align: center;
     }
 
     #cart p {
-      font-size: 14px;
       margin: 5px 0;
     }
 
@@ -96,6 +107,15 @@
       background: darkgreen;
     }
 
+    ul {
+      padding-left: 0;
+      list-style-type: none;
+    }
+
+    li {
+      margin: 5px 0;
+    }
+
     @media (max-width: 900px) {
       .container {
         flex-direction: column;
@@ -110,6 +130,32 @@
         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       }
     }
+
+    .faq-section, .testimonials {
+      text-align: left;
+      margin: 20px 0;
+    }
+
+    .faq-section h3, .testimonials h3 {
+      text-align: center;
+    }
+
+    .faq-item {
+      margin-bottom: 15px;
+    }
+
+    .faq-item strong {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .testimonial {
+      background: #e6f7ff;
+      padding: 15px;
+      border-radius: 12px;
+      margin: 10px 0;
+    }
+
   </style>
 </head>
 
@@ -118,8 +164,7 @@
 <h1>RentABubble</h1>
 
 <p style="font-size:18px;">
-Want all the fun of bubbles but have asthma or just don't want to blow them yourself?
-<br><br>
+Want all the fun of bubbles but have asthma or just don't want to blow yourself?  
 We came up with the perfect solution — <strong>RentABubble</strong>!
 </p>
 
@@ -130,10 +175,28 @@ You can rent all the bubbles you want and enjoy nonstop bubbly fun without the w
 <hr>
 
 <h2>💲 Pricing</h2>
-<p style="font-size:17px;">
-<strong>$5 per bubble — per day</strong><br>
-<strong>$10 per bubble — full weekend fun!</strong>
-</p>
+<table style="margin:auto; font-size:16px; border-collapse: collapse;">
+  <tr style="background:#00aaff; color:white;">
+    <th style="padding:10px 20px; border-radius:8px 0 0 8px;">Bubble Type</th>
+    <th style="padding:10px 20px;">1 Day</th>
+    <th style="padding:10px 20px;">Weekend</th>
+  </tr>
+  <tr>
+    <td style="padding:10px;">Mini Bubble</td>
+    <td style="padding:10px;">$3</td>
+    <td style="padding:10px;">$7</td>
+  </tr>
+  <tr>
+    <td style="padding:10px;">Standard Bubble</td>
+    <td style="padding:10px;">$5</td>
+    <td style="padding:10px;">$10</td>
+  </tr>
+  <tr>
+    <td style="padding:10px;">Party Bubble Pack (5 Bubbles)</td>
+    <td style="padding:10px;">$20</td>
+    <td style="padding:10px;">$35</td>
+  </tr>
+</table>
 
 <hr>
 
@@ -141,21 +204,39 @@ You can rent all the bubbles you want and enjoy nonstop bubbly fun without the w
 <div class="container">
 
   <div class="bubble-card">
-    <h2>1-Day Bubble</h2>
-    <p>Price: $5 per bubble</p>
+    <h2>Mini Bubble</h2>
+    <p>Price: $3 per day</p>
     <label>Quantity:
-      <input type="number" id="dayQty" value="1" min="1" style="width:50px;">
+      <input type="number" id="miniQty" value="1" min="1" style="width:50px;">
     </label>
-    <button onclick="addToCart('1-Day Bubble', 5, 'dayQty')">Add to Cart</button>
+    <button onclick="addToCart('Mini Bubble', 3, 'miniQty')">Add to Cart</button>
+  </div>
+
+  <div class="bubble-card">
+    <h2>Standard Bubble</h2>
+    <p>Price: $5 per day</p>
+    <label>Quantity:
+      <input type="number" id="standardQty" value="1" min="1" style="width:50px;">
+    </label>
+    <button onclick="addToCart('Standard Bubble', 5, 'standardQty')">Add to Cart</button>
   </div>
 
   <div class="bubble-card">
     <h2>Weekend Bubble</h2>
-    <p>Price: $10 per bubble</p>
+    <p>Price: $10 per weekend</p>
     <label>Quantity:
       <input type="number" id="weekendQty" value="1" min="1" style="width:50px;">
     </label>
     <button onclick="addToCart('Weekend Bubble', 10, 'weekendQty')">Add to Cart</button>
+  </div>
+
+  <div class="bubble-card">
+    <h2>Party Pack (5 Bubbles)</h2>
+    <p>Price: $20 per day / $35 weekend</p>
+    <label>Quantity:
+      <input type="number" id="packQty" value="1" min="1" style="width:50px;">
+    </label>
+    <button onclick="addToCart('Party Bubble Pack', 20, 'packQty')">Add to Cart</button>
   </div>
 
 </div>
@@ -166,22 +247,51 @@ You can rent all the bubbles you want and enjoy nonstop bubbly fun without the w
 <p style="color:#cc0000; font-size:16px;">
 Please treat our bubbles with care!  
 <br><br>
-If a bubble pops due to damage or misuse, replacement fees apply: 
-  Dont Try to reinflate the bubble will tell us they dont 
-  love you they just want your money 
-<br>
-<strong>$2,000 – $3,000 per bubble</strong>
+If a bubble pops due to damage or misuse, replacement fees apply:  
+<strong>$50 – $300 per bubble</strong> depending on size and type.
 </p>
 
 <hr>
 
 <h2>🎉 Perfect For:</h2>
 <ul style="list-style:none; font-size:16px; padding:0;">
-<li>🎈 funarals for kids</li>
-<li>🏫 School Events</li>
-<li>🎪 Festivals & Fairs</li>
-<li>👨‍👩‍👧 Family Fun Days and nights ;)</li>
+  <li>🎈 Birthday Parties & Kids Fun</li>
+  <li>🏫 School Events & Fundraisers</li>
+  <li>🎪 Festivals & Fairs</li>
+  <li>👨‍👩‍👧 Family Fun Days & Gatherings</li>
+  <li>💡 Creative Photoshoots & Social Media Fun</li>
 </ul>
+
+<hr>
+
+<h2>💬 Testimonials</h2>
+<div class="testimonials">
+  <div class="testimonial">"The bubbles were magical! Kids had a blast and I didn’t have to worry about cleanup!" – Sarah L.</div>
+  <div class="testimonial">"Perfect for our school carnival. Simple, safe, and fun!" – Mr. Johnson</div>
+  <div class="testimonial">"My backyard turned into a bubble wonderland. Highly recommend!" – Emily R.</div>
+</div>
+
+<hr>
+
+<h2>❓ FAQ</h2>
+<div class="faq-section">
+  <div class="faq-item">
+    <strong>Q: Can I rent multiple bubbles at once?</strong>
+    A: Yes! You can choose quantities for each bubble type and add them to your cart.
+  </div>
+  <div class="faq-item">
+    <strong>Q: What if a bubble pops?</strong>
+    A: Please follow our care instructions. Replacement fees may apply for misuse.
+  </div>
+  <div class="faq-item">
+    <strong>Q: Do you deliver?</strong>
+    A: Yes, local delivery is available for an additional fee. Contact us for details.
+  </div>
+  <div class="faq-item">
+    <strong>Q: How do I checkout?</strong>
+    A: Click the checkout button in your cart and follow the instructions to reserve your bubbles.
+  </div>
+</div>
 
 <hr>
 
@@ -221,13 +331,16 @@ function addToCart(name, price, qtyId) {
 }
 
 function checkout() {
-  alert(
-    "✅ Checkout Started\n\n" +
-    "To complete your order, email us at:\n" +
-    "rentabubble@gmail.com\n\n" +
-    "Send us the credit card info NOW for you bubbles.\n\n" +
-    "Steal Your Mothers Credit Card!!!"
-  );
+  if (cartTotal === 0) {
+    alert("Your cart is empty! Please add some bubbles first.");
+  } else {
+    alert(
+      "✅ Checkout Started\n\n" +
+      "To complete your order, email us at:\n" +
+      "rentabubble@gmail.com\n\n" +
+      "Please include your name, bubble type(s), quantity, and preferred rental dates."
+    );
+  }
 }
 </script>
 
