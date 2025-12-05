@@ -5,61 +5,92 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 
-<body style="font-family: Arial, sans-serif; max-width: 800px; margin:auto; text-align:center; padding:20px; background:#f7fcff;">
+<body style="font-family: Arial,sans-serif; max-width:800px; margin:auto; text-align:center; padding:20px; background:#f7fcff;">
 
 <h1 style="color:#00aaff;">RentABubble</h1>
 
-<p style="font-size:18px;">
-Want all the fun of bubbles but have asthma or just don’t want to blow them yourself?
+<p>
+Want all the fun of bubbles but have asthma or just don’t want to blow them?
 <br><br>
-We came up with the perfect solution — <strong>RentABubble</strong>!
-</p>
-
-<p style="font-size:17px;">
-You can rent all the bubbles you want and enjoy nonstop bubbly fun without the work.
+Welcome to <strong>RentABubble</strong> — rent bubbles for stress-free fun!
 </p>
 
 <hr>
 
-<h2>💲 Pricing</h2>
-<p style="font-size:17px;">
-<strong>$5 per bubble — per day</strong><br>
-<strong>$10 per bubble — full weekend fun!</strong>
-</p>
+<h2>💲 Rent Bubbles</h2>
+
+<label><strong>Choose Rental Type:</strong></label><br>
+<select id="rentalType">
+  <option value="5">1-Day Rental — $5 per bubble</option>
+  <option value="10">Weekend Rental — $10 per bubble</option>
+</select>
+
+<br><br>
+
+<label><strong>How Many Bubbles?</strong></label><br>
+<input type="number" id="quantity" value="1" min="1" style="width:60px;">
+
+<br><br>
+
+<button onclick="addToCart()"
+ style="padding:12px 24px; font-size:16px; background:#00aaff; color:white; border:none; cursor:pointer; border-radius:5px;">
+Add To Cart
+</button>
 
 <hr>
 
-<h2>⚠️ Bubble Care Policy</h2>
-<p style="color:#cc0000; font-size:16px;">
-Please treat our bubbles with care!  
-<br><br>
-If a bubble pops due to damage or misuse, replacement fees apply:
+<h2>🛒 Your Cart</h2>
+
+<div id="cart">Your cart is empty.</div>
+
 <br>
-<strong>$2,000 – $3,000 per bubble</strong>
-</p>
+
+<h3 id="total">Total: $0</h3>
+
+<button onclick="checkout()"
+ style="padding:12px 30px; background:green; color:white; font-size:16px; border:none; cursor:pointer;">
+Checkout (Demo)
+</button>
 
 <hr>
 
-<h2>🎉 Perfect For:</h2>
-<ul style="list-style:none; font-size:16px; padding:0;">
-<li>🎈 Birthday Parties</li>
-<li>🏫 School Events</li>
-<li>🎪 Festivals & Fairs</li>
-<li>👨‍👩‍👧 Family Fun Days</li>
-</ul>
-
-<hr>
-
-<h2>📞 Contact</h2>
-<p>
-Email: <strong>RenABubble.com@gmail.com</strong><br>
-Phone: <strong>(614)-961-2377</strong>
-</p>
+<h2 style="color:red;">⚠️ Bubble Care Policy</h2>
 
 <p>
-<em>Website coming soon at:</em><br>
-<strong>www.RentABubble.com</strong>
+If a bubble pops due to damage or misuse,<br>
+replacement fees apply:
+<br><strong>$2,000 – $3,000 per bubble</strong>
 </p>
+
+<script>
+
+let cartTotal = 0;
+
+function addToCart() {
+  let type = document.getElementById("rentalType");
+  let price = Number(type.value);
+  let name = type.options[type.selectedIndex].text;
+
+  let qty = Number(document.getElementById("quantity").value);
+
+  let cost = price * qty;
+  cartTotal += cost;
+
+  let cart = document.getElementById("cart");
+  cart.innerHTML += `<p>✅ ${qty} bubble(s) — ${name}: $${cost}</p>`;
+
+  document.getElementById("total").innerHTML = "Total: $" + cartTotal;
+}
+
+function checkout() {
+  alert(
+    "Checkout Demo Only!\n" +
+    "Your total is $" + cartTotal + "\n\n" +
+    "To accept real payments you'd connect PayPal or Stripe."
+  );
+}
+
+</script>
 
 </body>
 </html>
