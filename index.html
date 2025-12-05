@@ -447,6 +447,20 @@ function checkout() {
       "Please email us the credit card details at:\n" +
       "rentabubble@gmail.com" 
     );
+
+    // Clear the cart after checkout
+    document.getElementById('cart-items').innerHTML = 'Your cart is empty.';
+    cartTotal = 0;
+    document.getElementById('total').innerText = "Total: $0";
+  }
+}
+
+function toggleCart() {
+  document.getElementById('cart').classList.toggle('open');
+}
+</script>
+ 
+    );
   }
 }
 
