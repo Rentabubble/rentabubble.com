@@ -74,6 +74,7 @@
         <div>YOU SURVIVED!</div>
         <button id="restart-btn">NEXT NIGHT</button>
     </div>
+
     <script>
         const sharedLuxRoom = 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Jeffrey_Epstein_property_interior.jpg/1280px-Jeffrey_Epstein_property_interior.jpg';
 
@@ -86,9 +87,286 @@
             { name: 'CAM06 - Beachfront Interior', url: sharedLuxRoom }
         ];
 
-        // ... (the rest of your script remains exactly the same as before – enemies array, variables, functions like initNight, updatePower, etc.)
+        const enemies = [
+            'https://upload.wikimedia.org/wikipedia/commons/5/56/Donald_Trump_official_portrait.jpg',
+            'https://upload.wikimedia.org/wikipedia/commons/0/08/Ghislaine_Maxwell_%28cropped%29.jpg',
+            'https://upload.wikimedia.org/wikipedia/commons/d/d3/Bill_Clinton.jpg',
+            'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Bill_Clinton_with_Winnie_the_Pooh.jpg/800px-Bill_Clinton_with_Winnie_the_Pooh.jpg',
+            'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgICAgICAgHBwcHCAoHBwcHBw8ICQcKFREWFhURExMYHSggGBolGxMTITEhMSkrLjouFx8zODMsNygtLisBCgoKDQ0NDw8NDysZFRkrKysrKystLSsrKysrKy0rKysrKys3KysrKysrKysrKysrKysrKysrKysrKysrKysrK//AABEIAQMAwgMBIgACEQEDEQH/xAAWAAEBAQAAAAAAAAAAAAAAAAAAAQf/xAAcEAEBAAIDAQEAAAAAAAAAAAAAATHwEYGRUUH/xAAVAQEBAAAAAAAAAAAAAAAAAAAAAf/EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhEDEQA/AMOFFUABBUQAAAABRRFE4QBQABQAAAAAA4DoAAAAAAAAAAAAAAAAAAAAAAAABdyIAAAAAAAAAAAAAAAAAAAAAAAAAAAigAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACKigAAAgCgCKAAAAAAAAAAAAAAAAAHIICpVABFAAAEUAAAAAAAAAAAAAAAABBQKi1ACCglCgCooAigAAAAAAAAAAAAAAigAAAACVQBFAAAAAAAAAAAAAAAAAAAAAAABFAAAAAAAAAAAAAAAAAAAAAAAAARQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACoAB0ACgIKgAAAoCBQAFBAABUBYgAAAAAAoIL4ABQAAEFQAUARQBFARRABQBFAQUARQE+KKB6G4BS5SgIQAD8SKAkUBQAAAQqACgCosARUAAigqKoIAKP//Z',
+            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSYxO4gWuUz07BRakSf3JxYY28sMp1Fm7fxMgJOVDF6Mn9WPGynwEva_wCvmi5f5JNQcWSxI6mp&s'
+        ];
 
-        // (Paste the full script from your previous version here, starting from const enemies = [...] down to initNight(); )
+        let activeAnims = [];
+        let currentNight = 1;
+        let isGameOver = false;
+        let nightStartTime;
+        let power = 100;
+        let isCamerasOpen = false;
+        let doorsClosed = false;
+        let canToggleDoors = true;
+        let currentCam = 0;
+        let powerDrainInterval, clockInterval, eventInterval;
+        let lowPowerTriggered = false;
+        let surgeActive = false;
+        const SECONDS_PER_GAME_HOUR = 40;
+        const CAMERA_DRAIN = 0.4;
+        const DOORS_DRAIN = 1.5;
+        const SPAWN_MIN = 12000;
+        const SPAWN_MAX = 45000;
+        const ACTIVATE_MIN = 10000;
+        const ACTIVATE_MAX = 30000;
+        const MOVE_SPEED = 4500;
+        const GLITCH_CHANCE = 0.25;
+        const SURGE_CHANCE = 0.08;
+
+        cameras.forEach((cam, i) => {
+            const btn = document.createElement('button');
+            btn.textContent = cam.name;
+            btn.onclick = () => switchCam(i);
+            document.getElementById('buttons').appendChild(btn);
+        });
+
+        function initNight() {
+            power = 100;
+            isCamerasOpen = false;
+            doorsClosed = false;
+            canToggleDoors = true;
+            currentCam = 0;
+            isGameOver = false;
+            lowPowerTriggered = false;
+            surgeActive = false;
+            nightStartTime = Date.now();
+            activeAnims.forEach(a => a.img?.remove());
+            activeAnims = [];
+            updatePower();
+            document.body.classList.remove('low-power', 'surge');
+            document.getElementById('game-over').style.display = 'none';
+            document.getElementById('game-win').style.display = 'none';
+            closeCameras();
+            clearInterval(powerDrainInterval);
+            clearInterval(clockInterval);
+            clearInterval(eventInterval);
+            clockInterval = setInterval(updateClock, 1000);
+            eventInterval = setInterval(randomEvent, 8000);
+            updateClock();
+            document.querySelector('h1').textContent = `FNAE: Five Nights at Epstein's - Night ${currentNight}`;
+            document.getElementById('win-title').textContent = `NIGHT ${currentNight} COMPLETE!`;
+            document.getElementById('restart-btn').textContent = currentNight >= 5 ? 'YOU WON THE GAME!' : 'NEXT NIGHT';
+            document.getElementById('doors-btn').textContent = 'CLOSE DOORS';
+            document.getElementById('doors-btn').classList.remove('disabled');
+            document.getElementById('toggle-btn').classList.remove('disabled');
+            document.getElementById('status').textContent = 'Doors Open - Temple Secure';
+            scheduleNextSpawn();
+        }
+
+        function updatePower() {
+            document.getElementById('power-fill').style.width = Math.max(power, 0) + '%';
+            document.getElementById('power-text').textContent = `POWER: ${Math.floor(power)}%`;
+            if (power <= 20 && !lowPowerTriggered) {
+                document.body.classList.add('low-power');
+                lowPowerTriggered = true;
+            } else if (power > 20) document.body.classList.remove('low-power');
+            if (power <= 0) gameOverFunc();
+        }
+
+        function drainPower() {
+            let drain = (isCamerasOpen ? CAMERA_DRAIN : 0) + (doorsClosed ? DOORS_DRAIN : 0);
+            if (surgeActive) drain *= -1.5;
+            power = Math.max(0, Math.min(100, power - drain));
+            updatePower();
+        }
+
+        function updateClock() {
+            const elapsed = (Date.now() - nightStartTime) / 1000;
+            const gameHours = elapsed / SECONDS_PER_GAME_HOUR;
+            if (gameHours >= 6) return winNight();
+            const hour = 12 + Math.floor(gameHours);
+            const min = Math.floor((gameHours % 1) * 60);
+            document.getElementById('clock').textContent = `${hour % 12 || 12}:${min.toString().padStart(2, '0')} AM`;
+        }
+
+        function switchCam(idx) {
+            if (isGameOver || doorsClosed) return;
+            currentCam = idx;
+            document.getElementById('camera-image').src = cameras[idx].url;
+            document.getElementById('camera-label').textContent = cameras[idx].name;
+            if (Math.random() < GLITCH_CHANCE) {
+                document.getElementById('monitor').classList.add('glitch');
+                setTimeout(() => document.getElementById('monitor').classList.remove('glitch'), 1200);
+            }
+            activeAnims.forEach(a => {
+                a.img.style.display = (a.assignedCam === idx) ? 'block' : 'none';
+            });
+        }
+
+        function randomEvent() {
+            if (isGameOver) return;
+            if (Math.random() < SURGE_CHANCE) {
+                surgeActive = true;
+                document.body.classList.add('surge');
+                power = Math.min(100, power + 30);
+                updatePower();
+                setTimeout(() => {
+                    surgeActive = false;
+                    document.body.classList.remove('surge');
+                }, 4000);
+            }
+        }
+
+        function scheduleNextSpawn() {
+            if (isGameOver) return;
+            const delay = SPAWN_MIN + Math.random() * (SPAWN_MAX - SPAWN_MIN);
+            setTimeout(spawnAnim, delay);
+        }
+
+        function spawnAnim() {
+            if (isGameOver) return;
+            const assignedCam = Math.floor(Math.random() * cameras.length);
+            const src = enemies[Math.floor(Math.random() * enemies.length)];
+            const img = document.createElement('img');
+            img.src = src;
+            img.className = 'animatronic';
+            img.style.left = (Math.random() * 70 + 10) + '%';
+            img.onerror = () => { img.style.background = '#000'; img.src = ''; };
+            document.getElementById('monitor').appendChild(img);
+            const obj = { img, assignedCam, position: parseFloat(img.style.left), isActive: false };
+            activeAnims.push(obj);
+            const delay = ACTIVATE_MIN + Math.random() * (ACTIVATE_MAX - ACTIVATE_MIN);
+            obj.activationTimer = setTimeout(() => {
+                if (!doorsClosed) activate(obj);
+            }, delay);
+            scheduleNextSpawn();
+        }
+
+        function activate(obj) {
+            if (isGameOver || obj.isActive || !obj.img.parentNode || doorsClosed) return;
+            obj.isActive = true;
+            obj.img.classList.add('active');
+            obj.img.style.left = '-15%';
+            setTimeout(() => {
+                if (obj.img.parentNode && obj.isActive && !doorsClosed) obj.img.style.left = '115%';
+            }, 300);
+            obj.moveEndTimer = setTimeout(() => {
+                if (obj.img.parentNode && obj.isActive) {
+                    if (!doorsClosed) {
+                        jumpscare(obj.img);
+                    } else {
+                        reset(obj);
+                    }
+                }
+            }, MOVE_SPEED + 300);
+        }
+
+        function jumpscare(target) {
+            if (target && target.parentNode) {
+                target.style.transition = 'all 0.35s';
+                target.style.left = '48%';
+                target.style.bottom = '-5%';
+                target.style.height = '110%';
+                target.style.transform = 'scale(2)';
+                target.style.filter = 'brightness(3) contrast(3.5) saturate(3)';
+                target.style.zIndex = '500';
+            }
+            isGameOver = true;
+            clearInterval(powerDrainInterval);
+            clearInterval(clockInterval);
+            clearInterval(eventInterval);
+            document.getElementById('toggle-btn').classList.add('disabled');
+            document.getElementById('doors-btn').classList.add('disabled');
+            setTimeout(() => document.getElementById('game-over').style.display = 'flex', 800);
+        }
+
+        function reset(obj) {
+            if (!obj.img.parentNode) return;
+            obj.isActive = false;
+            obj.img.classList.remove('active');
+            obj.img.style.transition = 'left 1.2s ease-out';
+            obj.img.style.left = (Math.random() * 70 + 10) + '%';
+            clearTimeout(obj.activationTimer);
+            clearTimeout(obj.moveEndTimer);
+        }
+
+        function closeDoorsAction() {
+            if (!canToggleDoors || isGameOver) return;
+            doorsClosed = true;
+            canToggleDoors = false;
+            document.getElementById('doors-btn').textContent = 'OPEN DOORS';
+            document.getElementById('doors-btn').classList.add('disabled');
+            document.getElementById('base-label').textContent = 'BASE: Temple Overlook - Doors Closed';
+            document.getElementById('status').textContent = 'Doors Closed - Heavy Drain';
+            activeAnims.forEach(obj => {
+                clearTimeout(obj.activationTimer);
+                clearTimeout(obj.moveEndTimer);
+                if (obj.isActive) {
+                    obj.isActive = false;
+                    obj.img.classList.remove('active');
+                    obj.img.style.left = (Math.random() * 70 + 10) + '%';
+                }
+            });
+            setTimeout(() => {
+                canToggleDoors = true;
+                document.getElementById('doors-btn').classList.remove('disabled');
+            }, 8000);
+        }
+
+        function openDoorsAction() {
+            if (!canToggleDoors || isGameOver) return;
+            doorsClosed = false;
+            document.getElementById('doors-btn').textContent = 'CLOSE DOORS';
+            document.getElementById('base-label').textContent = 'BASE: Temple Overlook - Doors Open';
+            document.getElementById('status').textContent = isCamerasOpen ? 'Cameras Open - Monitoring...' : 'Doors Open - Temple Secure';
+        }
+
+        function closeCameras() {
+            isCamerasOpen = false;
+            document.getElementById('base-view').style.display = 'block';
+            document.getElementById('monitor').style.display = 'none';
+            document.getElementById('toggle-btn').textContent = 'OPEN CAMERAS';
+            document.getElementById('buttons').style.display = 'none';
+            document.getElementById('status').textContent = doorsClosed ? 'Doors Closed - Heavy Drain' : 'Doors Open - Temple Secure';
+            clearInterval(powerDrainInterval);
+        }
+
+        function openCameras() {
+            if (power <= 0 || isGameOver) return;
+            isCamerasOpen = true;
+            document.getElementById('base-view').style.display = 'none';
+            document.getElementById('monitor').style.display = 'block';
+            document.getElementById('toggle-btn').textContent = 'CLOSE CAMERAS';
+            document.getElementById('buttons').style.display = 'flex';
+            document.getElementById('status').textContent = doorsClosed ? 'Doors Closed - Cams Active' : 'Cameras Open - Monitoring...';
+            powerDrainInterval = setInterval(drainPower, 1000);
+            switchCam(currentCam);
+        }
+
+        function gameOverFunc() {
+            isGameOver = true;
+            clearInterval(powerDrainInterval);
+            clearInterval(clockInterval);
+            clearInterval(eventInterval);
+            document.getElementById('toggle-btn').classList.add('disabled');
+            document.getElementById('doors-btn').classList.add('disabled');
+            setTimeout(() => document.getElementById('game-over').style.display = 'flex', 800);
+        }
+
+        function winNight() {
+            isGameOver = true;
+            clearInterval(powerDrainInterval);
+            clearInterval(clockInterval);
+            clearInterval(eventInterval);
+            document.getElementById('game-win').style.display = 'flex';
+            if (currentNight >= 5) {
+                document.getElementById('win-title').textContent = 'YOU SURVIVED ALL 5 NIGHTS!';
+                document.getElementById('restart-btn').textContent = 'PLAY AGAIN';
+            }
+        }
+
+        document.getElementById('toggle-btn').onclick = () => isGameOver ? null : (isCamerasOpen ? closeCameras() : openCameras());
+        document.getElementById('doors-btn').onclick = () => isGameOver ? null : (doorsClosed ? openDoorsAction() : closeDoorsAction());
+        document.getElementById('restart-btn').onclick = () => {
+            currentNight = currentNight >= 5 ? 1 : currentNight + 1;
+            initNight();
+        };
 
         initNight();
     </script>
