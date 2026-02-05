@@ -87,11 +87,11 @@
     <script>
         const cameras = [
             { name: 'CAM01 - Temple Exterior', url: 'https://upload.wikimedia.org/wikipedia/commons/5/58/EFTA00002940-Temple_-_Blue-and-white_striped_building_with_a_red-and-white_labyrinth_in_front_set_against_a_tropical_backdrop_of_palm_trees_and_the_ocean_under_a_bright_sky.jpg' },
-            { name: 'CAM02 - Island Bedroom', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Little_Saint_James_-_Epstein_property_2019.jpg/1280px-Little_Saint_James_-_Epstein_property_2019.jpg' },
-            { name: 'CAM03 - Dental/Exam Room', url: 'https://ichef.bbci.co.uk/news/976/cpsprodpb/12E2/production/_133940000_epstein_dental.jpg' },
-            { name: 'CAM04 - Pool Area', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Epstein_Island_Pool_Area.jpg/1280px-Epstein_Island_Pool_Area.jpg' },
-            { name: 'CAM05 - Interior Hallway', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Jeffrey_Epstein_property_interior.jpg/1280px-Jeffrey_Epstein_property_interior.jpg' },
-            { name: 'CAM06 - Beachfront', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Little_Saint_James_beachfront_2019.jpg/1280px-Little_Saint_James_beachfront_2019.jpg' }
+            { name: 'CAM02 - Dental Office', url: 'https://pbs.twimg.com/media/Gd5qZ0jW0AAZ5Z5.jpg' },
+            { name: 'CAM03 - Blue Bedroom', url: 'https://pbs.twimg.com/media/Gd5qZ0jW0AAZ5Z5.jpg:large' },
+            { name: 'CAM04 - White Bedroom', url: 'https://pbs.twimg.com/media/Gd5qZ0jW0AAZ5Z5.jpg:large' },
+            { name: 'CAM05 - Hallway with Supplies', url: 'https://pbs.twimg.com/media/Gd5qZ0jW0AAZ5Z5.jpg:large' },
+            { name: 'CAM06 - Lounge Chairs', url: 'https://pbs.twimg.com/media/Gd5qZ0jW0AAZ5Z5.jpg:large' }
         ];
 
         const enemies = [
@@ -100,7 +100,7 @@
             'https://upload.wikimedia.org/wikipedia/commons/0/08/Ghislaine_Maxwell_%28cropped%29.jpg',
             'https://upload.wikimedia.org/wikipedia/commons/d/d3/Bill_Clinton.jpg',
             'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Bill_Clinton_with_Winnie_the_Pooh.jpg/800px-Bill_Clinton_with_Winnie_the_Pooh.jpg',
-            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSYxO4gWuUz07BRakSf3JxYY28sMp1Fm7fxMgJOVDF6Mn9WPGynwEva_wCvmi5f5JNQcWSxI6mp&s'  // new one added
+            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSYxO4gWuUz07BRakSf3JxYY28sMp1Fm7fxMgJOVDF6Mn9WPGynwEva_wCvmi5f5JNQcWSxI6mp&s'
         ];
 
         let activeAnims = [];
@@ -121,7 +121,7 @@
         const SECONDS_PER_GAME_HOUR = 40;
         const CAMERA_DRAIN = 0.4;
         const DOORS_DRAIN = 1.5;
-        const SPAWN_MIN = 12000;    // rarer spawns
+        const SPAWN_MIN = 12000;
         const SPAWN_MAX = 45000;
         const ACTIVATE_MIN = 10000;
         const ACTIVATE_MAX = 30000;
@@ -338,7 +338,6 @@
                     document.getElementById('status').textContent = 'Doors Closed - Threat Returned';
                 }
             }
-            // Pause all ongoing activations/moves when doors close
             activeAnims.forEach(obj => {
                 clearTimeout(obj.activationTimer);
                 clearTimeout(obj.moveEndTimer);
@@ -360,7 +359,6 @@
             document.getElementById('doors-btn').textContent = 'CLOSE DOORS';
             document.getElementById('base-label').textContent = 'BASE: Temple Overlook - Doors Open';
             document.getElementById('status').textContent = isCamerasOpen ? 'Cameras Open - Monitoring...' : 'Doors Open - Temple Secure';
-            // Re-schedule activation for paused enemies if needed (optional, but here we don't re-trigger immediately)
         }
 
         function closeCameras() {
