@@ -83,24 +83,23 @@
         <div>YOU SURVIVED!</div>
         <button id="restart-btn">NEXT NIGHT</button>
     </div>
-
     <script>
         const cameras = [
             { name: 'CAM01 - Temple Exterior', url: 'https://upload.wikimedia.org/wikipedia/commons/5/58/EFTA00002940-Temple_-_Blue-and-white_striped_building_with_a_red-and-white_labyrinth_in_front_set_against_a_tropical_backdrop_of_palm_trees_and_the_ocean_under_a_bright_sky.jpg' },
-            { name: 'CAM02 - Island Bedroom', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Little_Saint_James_-_Epstein_property_2019.jpg/1280px-Little_Saint_James_-_Epstein_property_2019.jpg' },
-            { name: 'CAM03 - Dental/Exam Room', url: 'https://ichef.bbci.co.uk/news/976/cpsprodpb/12E2/production/_133940000_epstein_dental.jpg' },
-            { name: 'CAM04 - Pool Area', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Epstein_Island_Pool_Area.jpg/1280px-Epstein_Island_Pool_Area.jpg' },
-            { name: 'CAM05 - Interior Hallway', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Jeffrey_Epstein_property_interior.jpg/1280px-Jeffrey_Epstein_property_interior.jpg' },
-            { name: 'CAM06 - Beachfront', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Little_Saint_James_beachfront_2019.jpg/1280px-Little_Saint_James_beachfront_2019.jpg' }
+            { name: 'CAM02 - Island Bedroom', url: 'https://www.pbs.org/newshour/app/uploads/2025/12/IMG_5267S-1024x682.jpg' },  // Bedroom interior (PBS release)
+            { name: 'CAM03 - Dental/Exam Room', url: 'https://ichef.bbci.co.uk/news/976/cpsprodpb/590cb5b5-c906-40ca-8ba7-ce5a463e3d69.jpg' },  // Dental chair + masks (BBC)
+            { name: 'CAM04 - Pool Area / Living Space', url: 'https://media-cldnry.s-nbcnews.com/image/upload/t_nbcnews-fp-1200-630,f_auto,q_auto:best/rockcms/2025-12/251203-epstein-island-ew-1204p-461bcc.jpg' },  // Interior living/bedroom vibe (NBC)
+            { name: 'CAM05 - Interior Hallway', url: 'https://d3i6fh83elv35t.cloudfront.net/static/2025/12/IMG_5201S-1024x682.jpg' },  // Bedroom/living interior (PBS)
+            { name: 'CAM06 - Beachfront Interior', url: 'https://abcnews.go.com/images/US/epstein-house-2-rt-jef-251203_1764792198354_hpMain.jpg' }  // Interior near beach/property (ABC)
         ];
 
         const enemies = [
             'https://upload.wikimedia.org/wikipedia/commons/5/56/Donald_Trump_official_portrait.jpg',
-            'https://upload.wikimedia.org/wikipedia/commons/a/a0/Bill_Gates_2018.jpg',
             'https://upload.wikimedia.org/wikipedia/commons/0/08/Ghislaine_Maxwell_%28cropped%29.jpg',
             'https://upload.wikimedia.org/wikipedia/commons/d/d3/Bill_Clinton.jpg',
             'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Bill_Clinton_with_Winnie_the_Pooh.jpg/800px-Bill_Clinton_with_Winnie_the_Pooh.jpg',
-            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSYxO4gWuUz07BRakSf3JxYY28sMp1Fm7fxMgJOVDF6Mn9WPGynwEva_wCvmi5f5JNQcWSxI6mp&s'  // new one added
+            'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgICAgICAgHBwcHCAoHBwcHBw8ICQcKFREWFhURExMYHSggGBolGxMTITEhMSkrLjouFx8zODMsNygtLisBCgoKDQ0NDw8NDysZFRkrKysrKystLSsrKysrKy0rKysrKys3KysrKysrKysrKysrKysrKysrKysrKysrKysrK//AABEIAQMAwgMBIgACEQEDEQH/xAAWAAEBAQAAAAAAAAAAAAAAAAAAAQf/xAAcEAEBAAIDAQEAAAAAAAAAAAAAATHwEYGRUUH/xAAVAQEBAAAAAAAAAAAAAAAAAAAAAf/EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhEDEQA/AMOFFUABBUQAAAABRRFE4QBQABQAAAAAA4DoAAAAAAAAAAAAAAAAAAAAAAAABdyIAAAAAAAAAAAAAAAAAAAAAAAAAAAigAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACKigAAAgCgCKAAAAAAAAAAAAAAAAAHIICpVABFAAAEUAAAAAAAAAAAAAAAABBQKi1ACCglCgCooAigAAAAAAAAAAAAAAigAAAACVQBFAAAAAAAAAAAAAAAAAAAAAAABFAAAAAAAAAAAAAAAAAAAAAAAAARQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACoAB0ACgIKgAAAoCBQAFBAABUBYgAAAAAAoIL4ABQAAEFQAUARQBFARRABQBFAQUARQE+KKB6G4BS5SgIQAD8SKAkUBQAAAQqACgCosARUAAigqKoIAKP//Z',
+            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSYxO4gWuUz07BRakSf3JxYY28sMp1Fm7fxMgJOVDF6Mn9WPGynwEva_wCvmi5f5JNQcWSxI6mp&s'
         ];
 
         let activeAnims = [];
@@ -117,11 +116,10 @@
         let surgeActive = false;
         let warningAnim = null;
         let countdownInterval = null;
-
         const SECONDS_PER_GAME_HOUR = 40;
         const CAMERA_DRAIN = 0.4;
         const DOORS_DRAIN = 1.5;
-        const SPAWN_MIN = 12000;    // rarer spawns
+        const SPAWN_MIN = 12000; // rarer spawns
         const SPAWN_MAX = 45000;
         const ACTIVATE_MIN = 10000;
         const ACTIVATE_MAX = 30000;
@@ -338,7 +336,6 @@
                     document.getElementById('status').textContent = 'Doors Closed - Threat Returned';
                 }
             }
-            // Pause all ongoing activations/moves when doors close
             activeAnims.forEach(obj => {
                 clearTimeout(obj.activationTimer);
                 clearTimeout(obj.moveEndTimer);
@@ -360,7 +357,6 @@
             document.getElementById('doors-btn').textContent = 'CLOSE DOORS';
             document.getElementById('base-label').textContent = 'BASE: Temple Overlook - Doors Open';
             document.getElementById('status').textContent = isCamerasOpen ? 'Cameras Open - Monitoring...' : 'Doors Open - Temple Secure';
-            // Re-schedule activation for paused enemies if needed (optional, but here we don't re-trigger immediately)
         }
 
         function closeCameras() {
