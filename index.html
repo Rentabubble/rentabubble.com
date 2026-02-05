@@ -42,9 +42,6 @@
         #restart-btn { margin-top: 30px; padding: 20px 50px; font-size: 1.5em; background: lime; color: black; border: none; border-radius: 10px; cursor: pointer; }
         .animatronic { position: absolute; bottom: 10%; height: 65%; transition: left 0.5s linear, opacity 0.8s, filter 0.5s; z-index: 25; pointer-events: none; opacity: 0.35; filter: brightness(0.7) grayscale(80%); display: none; background: #000; }
         .animatronic.active { opacity: 0.92; filter: brightness(1.3) grayscale(0%); transition: left 0.42s linear; }
-        #urgent-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,0,0,0.7); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 30; color: white; font-size: 3em; text-shadow: 0 0 10px black; pointer-events: all; }
-        #urgent-doors { background: #ff0000; color: white; border: 5px solid yellow; padding: 20px 50px; font-size: 2em; margin-top: 20px; cursor: pointer; }
-        #timer-countdown { font-size: 4em; color: yellow; text-shadow: 0 0 20px red; }
     </style>
 </head>
 <body>
@@ -64,12 +61,6 @@
             <div id="camera-label">CAM Loading...</div>
         </div>
         <button id="toggle-btn">OPEN CAMERAS</button>
-        <div id="urgent-overlay">
-            <div>THEY'RE COMING!</div>
-            <div>CLOSE DOORS IN</div>
-            <div id="timer-countdown">15</div>
-            <button id="urgent-doors">CLOSE DOORS NOW!</button>
-        </div>
     </div>
     <div id="buttons"></div>
     <div id="status">Doors Open - Temple Secure</div>
@@ -84,13 +75,15 @@
         <button id="restart-btn">NEXT NIGHT</button>
     </div>
     <script>
+        const sharedCamImage = 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Epstein_Island_Pool_Area.jpg/1280px-Epstein_Island_Pool_Area.jpg';
+
         const cameras = [
             { name: 'CAM01 - Temple Exterior', url: 'https://upload.wikimedia.org/wikipedia/commons/5/58/EFTA00002940-Temple_-_Blue-and-white_striped_building_with_a_red-and-white_labyrinth_in_front_set_against_a_tropical_backdrop_of_palm_trees_and_the_ocean_under_a_bright_sky.jpg' },
-            { name: 'CAM02 - Island Bedroom', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Little_Saint_James_-_Epstein_property_2019.jpg/1280px-Little_Saint_James_-_Epstein_property_2019.jpg' },
-            { name: 'CAM03 - Dental/Exam Room', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Little_St_James_Island_%289123420726%29.jpg/1280px-Little_St_James_Island_%289123420726%29.jpg' },  // Island property view (proxy for creepy interior feel)
-            { name: 'CAM04 - Pool Area / Living Space', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Epstein_Island_Pool_Area.jpg/1280px-Epstein_Island_Pool_Area.jpg' },
-            { name: 'CAM05 - Interior Hallway', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Jeffrey_Epstein_property_interior.jpg/1280px-Jeffrey_Epstein_property_interior.jpg' },
-            { name: 'CAM06 - Beachfront Interior', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Little_Saint_James_beachfront_2019.jpg/1280px-Little_Saint_James_beachfront_2019.jpg' }
+            { name: 'CAM02 - Island Bedroom', url: sharedCamImage },
+            { name: 'CAM03 - Dental/Exam Room', url: sharedCamImage },
+            { name: 'CAM04 - Pool Area / Living Space', url: sharedCamImage },
+            { name: 'CAM05 - Interior Hallway', url: sharedCamImage },
+            { name: 'CAM06 - Beachfront Interior', url: sharedCamImage }
         ];
 
         const enemies = [
@@ -114,8 +107,6 @@
         let powerDrainInterval, clockInterval, eventInterval;
         let lowPowerTriggered = false;
         let surgeActive = false;
-        let warningAnim = null;
-        let countdownInterval = null;
         const SECONDS_PER_GAME_HOUR = 40;
         const CAMERA_DRAIN = 0.4;
         const DOORS_DRAIN = 1.5;
@@ -126,7 +117,6 @@
         const MOVE_SPEED = 4500;
         const GLITCH_CHANCE = 0.25;
         const SURGE_CHANCE = 0.08;
-        const WARNING_TIME = 15000;
 
         cameras.forEach((cam, i) => {
             const btn = document.createElement('button');
@@ -151,12 +141,10 @@
             document.body.classList.remove('low-power', 'surge');
             document.getElementById('game-over').style.display = 'none';
             document.getElementById('game-win').style.display = 'none';
-            document.getElementById('urgent-overlay').style.display = 'none';
             closeCameras();
             clearInterval(powerDrainInterval);
             clearInterval(clockInterval);
             clearInterval(eventInterval);
-            if (countdownInterval) clearInterval(countdownInterval);
             clockInterval = setInterval(updateClock, 1000);
             eventInterval = setInterval(randomEvent, 8000);
             updateClock();
@@ -260,7 +248,7 @@
             obj.moveEndTimer = setTimeout(() => {
                 if (obj.img.parentNode && obj.isActive) {
                     if (!doorsClosed) {
-                        triggerWarning(obj.img);
+                        jumpscare(obj.img);
                     } else {
                         reset(obj);
                     }
@@ -268,26 +256,7 @@
             }, MOVE_SPEED + 300);
         }
 
-        function triggerWarning(targetImg) {
-            if (document.getElementById('urgent-overlay').style.display === 'flex') return;
-            warningAnim = targetImg;
-            document.getElementById('urgent-overlay').style.display = 'flex';
-            let timeLeft = 15;
-            document.getElementById('timer-countdown').textContent = timeLeft;
-            countdownInterval = setInterval(() => {
-                timeLeft--;
-                document.getElementById('timer-countdown').textContent = timeLeft;
-                if (timeLeft <= 0) {
-                    clearInterval(countdownInterval);
-                    if (document.getElementById('urgent-overlay').style.display === 'flex') {
-                        jumpscare(targetImg);
-                    }
-                }
-            }, 1000);
-        }
-
         function jumpscare(target) {
-            document.getElementById('urgent-overlay').style.display = 'none';
             if (target && target.parentNode) {
                 target.style.transition = 'all 0.35s';
                 target.style.left = '48%';
@@ -301,7 +270,6 @@
             clearInterval(powerDrainInterval);
             clearInterval(clockInterval);
             clearInterval(eventInterval);
-            if (countdownInterval) clearInterval(countdownInterval);
             document.getElementById('toggle-btn').classList.add('disabled');
             document.getElementById('doors-btn').classList.add('disabled');
             setTimeout(() => document.getElementById('game-over').style.display = 'flex', 800);
@@ -313,8 +281,6 @@
             obj.img.classList.remove('active');
             obj.img.style.transition = 'left 1.2s ease-out';
             obj.img.style.left = (Math.random() * 70 + 10) + '%';
-            document.getElementById('urgent-overlay').style.display = 'none';
-            if (countdownInterval) clearInterval(countdownInterval);
             clearTimeout(obj.activationTimer);
             clearTimeout(obj.moveEndTimer);
         }
@@ -327,15 +293,6 @@
             document.getElementById('doors-btn').classList.add('disabled');
             document.getElementById('base-label').textContent = 'BASE: Temple Overlook - Doors Closed';
             document.getElementById('status').textContent = 'Doors Closed - Heavy Drain';
-            if (document.getElementById('urgent-overlay').style.display === 'flex') {
-                document.getElementById('urgent-overlay').style.display = 'none';
-                if (countdownInterval) clearInterval(countdownInterval);
-                if (warningAnim) {
-                    const obj = activeAnims.find(a => a.img === warningAnim);
-                    if (obj) reset(obj);
-                    document.getElementById('status').textContent = 'Doors Closed - Threat Returned';
-                }
-            }
             activeAnims.forEach(obj => {
                 clearTimeout(obj.activationTimer);
                 clearTimeout(obj.moveEndTimer);
@@ -405,7 +362,6 @@
 
         document.getElementById('toggle-btn').onclick = () => isGameOver ? null : (isCamerasOpen ? closeCameras() : openCameras());
         document.getElementById('doors-btn').onclick = () => isGameOver ? null : (doorsClosed ? openDoorsAction() : closeDoorsAction());
-        document.getElementById('urgent-doors').onclick = closeDoorsAction;
         document.getElementById('restart-btn').onclick = () => {
             currentNight = currentNight >= 5 ? 1 : currentNight + 1;
             initNight();
