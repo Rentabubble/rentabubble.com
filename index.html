@@ -3,20 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Penguin World</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script> <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script> <!-- For anonymous auth -->
-    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script> <!-- Phaser CDN -->
+    <title>Penguin Adventure Game</title>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        #game { position: relative; width: 800px; height: 600px; margin: auto; background: url('https://cdna.artstation.com/p/assets/images/images/059/782/716/large/rushion-arts-agartha.jpg?1677132553') no-repeat center/cover; }
+        .player { position: absolute; width: 50px; height: 50px; transition: left 0.1s, top 0.1s; }
+        .chat-bubble { position: absolute; background: white; border: 1px solid black; padding: 5px; border-radius: 10px; max-width: 200px; word-wrap: break-word; display: none; top: -40px; left: 0; }
+        #chat-input { position: absolute; bottom: 10px; left: 10px; width: 300px; }
+        #chat-send { position: absolute; bottom: 10px; left: 320px; }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.2/firebase-database.js"></script>
 </head>
 <body>
-    <div id="game-container"></div>
-    <div id="chat-container">
-        <div id="chat-messages"></div>
-        <input type="text" id="chat-input" placeholder="Type to chat...">
-        <button id="chat-send">Send</button>
-    </div>
-    <script src="script.js"></script>
+    <div id="game"></div>
+    <input id="chat-input" type="text" placeholder="Type to chat...">
+    <button id="chat-send">Send</button>
+
+    <script>
+        // Replace with your Firebase config
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        let playerId;
+        let playerRef;
+        let players = {};
+        let playerName = 'Penguin' + Math.floor(Math.random() * 1000); // Random name
+
+        // Auth anonymously
+        auth.signInAnonymously().catch(console.error);
+
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                playerId = user.uid;
+                playerRef = db.ref(`players/${playerId}`);
+                playerRef.set({ id: playerId, name: playerName, x: Math.random() * 750, y: Math.random() * 550 });
+                playerRef.onDisconnect().remove();
+
+                // Listen for all players
+                db.ref('players').on('value', snapshot => {
+                    players = snapshot.val() || {};
+                    renderPlayers();
+                });
+
+                // Listen for chats
+                db.ref('chats').on('child_added', snapshot => {
+                    const chat = snapshot.val();
+                    showChatBubble(chat.playerId, chat.message);
+                    setTimeout(() => db.ref(`chats/${snapshot.key}`).remove(), 5000); // Auto-remove after 5s
+                });
+            }
+        });
+
+        // Movement
+        const speed = 5;
+        document.addEventListener('keydown', e => {
+            if (!playerRef) return;
+            const key = e.key;
+            playerRef.once('value').then(snapshot => {
+                const data = snapshot.val();
+                let x = data.x, y = data.y;
+                if (key === 'ArrowLeft' || key === 'a') x -= speed;
+                if (key === 'ArrowRight' || key === 'd') x += speed;
+                if (key === 'ArrowUp' || key === 'w') y -= speed;
+                if (key === 'ArrowDown' || key === 's') y += speed;
+                x = Math.max(0, Math.min(750, x));
+                y = Math.max(0, Math.min(550, y));
+                playerRef.update({ x, y });
+            });
+        });
+
+        // Chat
+        document.getElementById('chat-send').addEventListener('click', sendChat);
+        document.getElementById('chat-input').addEventListener('keypress', e => {
+            if (e.key === 'Enter') sendChat();
+        });
+
+        function sendChat() {
+            const message = document.getElementById('chat-input').value.trim();
+            if (message) {
+                db.ref('chats').push({ playerId, message });
+                document.getElementById('chat-input').value = '';
+            }
+        }
+
+        function renderPlayers() {
+            const game = document.getElementById('game');
+            game.innerHTML = ''; // Clear
+            Object.values(players).forEach(player => {
+                let elem = document.createElement('div');
+                elem.className = 'player';
+                elem.style.left = `${player.x}px`;
+                elem.style.top = `${player.y}px`;
+                elem.innerHTML = `<img src="https://e7.pngegg.com/pngimages/18/190/png-clipart-club-penguin-island-wikia-club-penguin-elite-penguin-force-purple-club-penguin.png" width="50" height="50" alt="Penguin">
+                                  <div class="chat-bubble" id="bubble-${player.id}"></div>
+                                  <div style="text-align:center; font-size:12px;">${player.name}</div>`;
+                game.appendChild(elem);
+            });
+        }
+
+        function showChatBubble(id, message) {
+            const bubble = document.getElementById(`bubble-${id}`);
+            if (bubble) {
+                bubble.textContent = message;
+                bubble.style.display = 'block';
+                setTimeout(() => bubble.style.display = 'none', 5000);
+            }
+        }
+    </script>
 </body>
 </html>
