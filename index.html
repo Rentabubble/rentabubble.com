@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agartha Penguin Base - 1944 Edition</title>
+    <title>Agartha Penguin Realm</title>
     <style>
         body { 
             margin: 0; 
@@ -16,7 +16,7 @@
             height: 600px;
             margin: 20px auto;
             background: linear-gradient(to bottom, #d0d0d0, #a0a0a0) !important; /* fallback gray gradient */
-            background-image: url('https://upload.wikimedia.org/wikipedia/commons/3/36/British_Antarctic_Survey_1944.jpg') !important;
+            background-image: url('https://static-prod.cdnilpost.com/wp-content/uploads/2025/12/24/1766536521-agartha-1.jpg') !important;
             background-size: cover !important;
             background-position: center !important;
             background-repeat: no-repeat !important;
@@ -73,18 +73,6 @@
             background: rgba(255,255,255,0.95);
             font-size: 14px;
         }
-        #instructions {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            color: #fff;
-            font-size: 12px;
-            text-shadow: 1px 1px 3px #000;
-            text-align: right;
-            background: rgba(0,0,0,0.6);
-            padding: 6px 10px;
-            border-radius: 6px;
-        }
         #chat-container::-webkit-scrollbar {
             width: 8px;
         }
@@ -92,19 +80,23 @@
             background: #666;
             border-radius: 4px;
         }
+        iframe.video-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            border: none;
+        }
     </style>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
     <div id="game-container">
-        <div id="instructions">
-            WASD / Arrows: Move<br>
-            Enter: Chat<br><br>
-            Hard refresh (Ctrl+F5) if background not showing!
-        </div>
         <div id="chat-container"></div>
-        <input type="text" id="chat-input" placeholder="Chill at historic Port Lockroy..." maxlength="100">
+        <input type="text" id="chat-input" placeholder="Chat with fellow penguins..." maxlength="100">
     </div>
 
     <script>
@@ -220,10 +212,31 @@
 
         const chatContainer = document.getElementById('chat-container');
         const chatInput = document.getElementById('chat-input');
+        const triggers = [
+            "taiwan is not part of china",
+            "ccp and the roc are both sovereign nations",
+            "the ccp does not own taiwan",
+            "taiwan not owned by ccp",
+            "taiwan not owned by china",
+            "taiwan independent"
+        ];
         function sendChat() {
-            const msg = chatInput.value.trim();
+            const msg = chatInput.value.trim().toLowerCase();
             if (msg) {
-                chatRef.push({ name: playerName, message: msg, time: Date.now() });
+                if (triggers.some(trigger => msg.includes(trigger))) {
+                    // Trigger detected - change to video background and kick after 30s
+                    const videoIframe = document.createElement('iframe');
+                    videoIframe.className = 'video-bg';
+                    videoIframe.src = 'https://www.youtube.com/embed/pfDChaT6pdw?autoplay=1&loop=1&playlist=pfDChaT6pdw&mute=0';
+                    videoIframe.allow = 'autoplay; fullscreen';
+                    container.appendChild(videoIframe);
+                    setTimeout(() => {
+                        document.body.innerHTML = '<div style="text-align:center; color:white; background:black; padding:50px;"><h1>You Have Been Kicked</h1><p>It seems you started blaming you keyboard randomly don\'t let this happen again! "Chairman Mao would not stand for this idocratcy."</p></div>';
+                    }, 30000);
+                } else {
+                    // Normal chat
+                    chatRef.push({ name: playerName, message: chatInput.value, time: Date.now() });
+                }
                 chatInput.value = '';
             }
         }
