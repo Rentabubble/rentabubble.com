@@ -3,19 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agartha Penguin Adventure</title>
+    <title>Agartha Penguin Base</title>
     <style>
-        body { margin: 0; font-family: Arial, sans-serif; }
+        body { 
+            margin: 0; 
+            font-family: Arial, sans-serif; 
+            background: #000;
+        }
         #game-container {
             position: relative;
             width: 800px;
             height: 600px;
             margin: 20px auto;
-            background-image: url('https://www.comicschau.de/wp-content/uploads/2025/12/agartha-meme-trend-tiktok-bedeutung.jpg');
+            background-image: url('https://upload.wikimedia.org/wikipedia/commons/3/36/British_Antarctic_Survey_1944.jpg');
             background-size: cover;
             background-position: center;
-            border: 2px solid #000;
+            border: 3px solid #444;
             overflow: hidden;
+            box-shadow: 0 0 20px rgba(0,0,0,0.7);
         }
         .penguin {
             position: absolute;
@@ -24,34 +29,66 @@
             background-image: url('https://e7.pngegg.com/pngimages/18/190/png-clipart-club-penguin-island-wikia-club-penguin-elite-penguin-force-purple-club-penguin.png');
             background-size: contain;
             background-repeat: no-repeat;
-            transition: top 0.1s, left 0.1s;
+            transition: left 0.1s ease-out, top 0.1s ease-out;
+            filter: drop-shadow(3px 3px 6px rgba(0,0,0,0.6));
         }
         .name-tag {
             position: absolute;
             top: -20px;
-            left: 0;
-            width: 100%;
-            text-align: center;
-            font-size: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
             color: #fff;
-            text-shadow: 1px 1px 2px #000;
+            text-shadow: 1px 1px 3px #000;
+            font-weight: bold;
+            white-space: nowrap;
+            background: rgba(0,0,0,0.4);
+            padding: 2px 6px;
+            border-radius: 4px;
         }
         #chat-container {
             position: absolute;
             bottom: 10px;
             left: 10px;
-            width: 300px;
-            height: 200px;
-            background: rgba(255, 255, 255, 0.8);
-            border: 1px solid #000;
+            width: 340px;
+            height: 180px;
+            background: rgba(255, 255, 255, 0.75);
+            border: 2px solid #333;
+            border-radius: 10px;
             padding: 10px;
             overflow-y: scroll;
+            color: #111;
+            font-size: 13px;
         }
         #chat-input {
             position: absolute;
-            bottom: 220px;
+            bottom: 205px;
             left: 10px;
-            width: 300px;
+            width: 340px;
+            padding: 8px;
+            border: 2px solid #444;
+            border-radius: 6px;
+            background: rgba(255,255,255,0.9);
+            font-size: 14px;
+        }
+        #instructions {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: #fff;
+            font-size: 12px;
+            text-shadow: 1px 1px 3px #000;
+            text-align: right;
+            background: rgba(0,0,0,0.5);
+            padding: 6px 10px;
+            border-radius: 6px;
+        }
+        #chat-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        #chat-container::-webkit-scrollbar-thumb {
+            background: #666;
+            border-radius: 4px;
         }
     </style>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -59,12 +96,16 @@
 </head>
 <body>
     <div id="game-container">
+        <div id="instructions">
+            WASD / Arrows: Move<br>
+            Enter: Chat
+        </div>
         <div id="chat-container"></div>
-        <input type="text" id="chat-input" placeholder="Type to chat...">
+        <input type="text" id="chat-input" placeholder="Chill in the Antarctic base..." maxlength="100">
     </div>
 
     <script>
-        // Replace with your Firebase config
+        // REPLACE WITH YOUR FIREBASE CONFIG
         const firebaseConfig = {
             apiKey: "YOUR_API_KEY",
             authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
@@ -77,19 +118,25 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        const playerId = Math.random().toString(36).substr(2, 9); // Unique player ID
-        const playerName = prompt('Enter your penguin name:') || 'Anonymous';
+        const playerId = Math.random().toString(36).substr(2, 9);
+        const playerName = prompt('Enter your penguin name:') || `Penguin${Math.floor(Math.random()*1000)}`;
+        
         const playersRef = db.ref('players');
         const chatRef = db.ref('chat');
 
-        // Local player data
         let player = {
-            x: 400,
-            y: 300,
-            name: playerName
+            x: Math.random() * 700 + 50,
+            y: Math.random() * 500 + 50,
+            name: playerName,
+            facing: 'right'
         };
+        let keys = {};
+        let lastTime = 0;
+        let lastUpdate = 0;
+        const speed = 250; // pixels per second
+        const UPDATE_INTERVAL = 50; // ms
 
-        // Create local penguin element
+        const container = document.getElementById('game-container');
         const penguinElem = document.createElement('div');
         penguinElem.className = 'penguin';
         penguinElem.id = playerId;
@@ -97,32 +144,56 @@
         nameTag.className = 'name-tag';
         nameTag.textContent = playerName;
         penguinElem.appendChild(nameTag);
-        document.getElementById('game-container').appendChild(penguinElem);
+        container.appendChild(penguinElem);
 
-        // Update position function
-        function updatePosition() {
-            penguinElem.style.left = `${player.x}px`;
-            penguinElem.style.top = `${player.y}px`;
-            playersRef.child(playerId).set(player);
-        }
-
-        // Key controls for movement
         document.addEventListener('keydown', (e) => {
-            const speed = 10;
-            switch (e.key) {
-                case 'ArrowUp': player.y = Math.max(0, player.y - speed); break;
-                case 'ArrowDown': player.y = Math.min(550, player.y + speed); break;
-                case 'ArrowLeft': player.x = Math.max(0, player.x - speed); break;
-                case 'ArrowRight': player.x = Math.min(750, player.x + speed); break;
+            keys[e.key.toLowerCase()] = true;
+            if (e.key === 'Enter') {
+                sendChat();
             }
-            updatePosition();
+        });
+        document.addEventListener('keyup', (e) => {
+            keys[e.key.toLowerCase()] = false;
         });
 
-        // Sync other players
+        function gameLoop(time) {
+            const dt = Math.min((time - lastTime) / 1000, 0.05);
+            lastTime = time;
+
+            let vx = 0, vy = 0;
+            if (keys['arrowleft'] || keys['a']) vx -= 1;
+            if (keys['arrowright'] || keys['d']) vx += 1;
+            if (keys['arrowup'] || keys['w']) vy -= 1;
+            if (keys['arrowdown'] || keys['s']) vy += 1;
+
+            if (vx !== 0 || vy !== 0) {
+                const mag = Math.sqrt(vx * vx + vy * vy) || 1;
+                vx = (vx / mag) * speed * dt;
+                vy = (vy / mag) * speed * dt;
+
+                player.x = Math.max(25, Math.min(775, player.x + vx));
+                player.y = Math.max(25, Math.min(575, player.y + vy));
+
+                if (vx > 0) player.facing = 'right';
+                else if (vx < 0) player.facing = 'left';
+
+                penguinElem.style.left = `${player.x}px`;
+                penguinElem.style.top = `${player.y}px`;
+                penguinElem.style.transform = `scaleX(${player.facing === 'left' ? -1 : 1})`;
+
+                if (Date.now() - lastUpdate > UPDATE_INTERVAL) {
+                    playersRef.child(playerId).set(player);
+                    lastUpdate = Date.now();
+                }
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
         playersRef.on('value', (snapshot) => {
-            const players = snapshot.val();
-            for (let id in players) {
-                if (id === playerId) continue;
+            const players = snapshot.val() || {};
+            Object.keys(players).forEach(id => {
+                if (id === playerId) return;
                 let otherElem = document.getElementById(id);
                 if (!otherElem) {
                     otherElem = document.createElement('div');
@@ -131,43 +202,50 @@
                     const otherNameTag = document.createElement('div');
                     otherNameTag.className = 'name-tag';
                     otherElem.appendChild(otherNameTag);
-                    document.getElementById('game-container').appendChild(otherElem);
+                    container.appendChild(otherElem);
                 }
-                otherElem.style.left = `${players[id].x}px`;
-                otherElem.style.top = `${players[id].y}px`;
-                otherElem.querySelector('.name-tag').textContent = players[id].name;
-            }
+                const p = players[id];
+                otherElem.style.left = `${p.x}px`;
+                otherElem.style.top = `${p.y}px`;
+                otherElem.style.transform = `scaleX(${p.facing === 'left' ? -1 : 1})`;
+                otherElem.querySelector('.name-tag').textContent = p.name;
+            });
         });
 
-        // Remove disconnected players
         playersRef.on('child_removed', (snapshot) => {
-            const removedElem = document.getElementById(snapshot.key);
-            if (removedElem) removedElem.remove();
+            const elem = document.getElementById(snapshot.key);
+            if (elem) elem.remove();
         });
 
-        // Chat functionality
         const chatContainer = document.getElementById('chat-container');
         const chatInput = document.getElementById('chat-input');
-        chatInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && chatInput.value.trim()) {
-                chatRef.push({ name: playerName, message: chatInput.value });
+        function sendChat() {
+            const msg = chatInput.value.trim();
+            if (msg) {
+                chatRef.push({ name: playerName, message: msg, time: Date.now() });
                 chatInput.value = '';
             }
+        }
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendChat();
         });
 
         chatRef.on('child_added', (snapshot) => {
-            const msg = snapshot.val();
+            const data = snapshot.val();
             const msgElem = document.createElement('div');
-            msgElem.textContent = `${msg.name}: ${msg.message}`;
+            msgElem.innerHTML = `<strong>${data.name}:</strong> ${data.message}`;
             chatContainer.appendChild(msgElem);
             chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            while (chatContainer.children.length > 50) {
+                chatContainer.removeChild(chatContainer.firstChild);
+            }
         });
 
-        // Clean up on disconnect
         playersRef.child(playerId).onDisconnect().remove();
 
-        // Initial update
-        updatePosition();
+        playersRef.child(playerId).set(player);
+        requestAnimationFrame(gameLoop);
     </script>
 </body>
 </html>
