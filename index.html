@@ -3,23 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Penguin Adventure Game</title>
+    <title>Agartha Penguin Adventure</title>
     <style>
-        body { margin: 0; overflow: hidden; }
-        #game { position: relative; width: 800px; height: 600px; margin: auto; background: url('https://cdna.artstation.com/p/assets/images/images/059/782/716/large/rushion-arts-agartha.jpg?1677132553') no-repeat center/cover; }
-        .player { position: absolute; width: 50px; height: 50px; transition: left 0.1s, top 0.1s; }
-        .chat-bubble { position: absolute; background: white; border: 1px solid black; padding: 5px; border-radius: 10px; max-width: 200px; word-wrap: break-word; display: none; top: -40px; left: 0; }
-        #chat-input { position: absolute; bottom: 10px; left: 10px; width: 300px; }
-        #chat-send { position: absolute; bottom: 10px; left: 320px; }
+        body { margin: 0; font-family: Arial, sans-serif; }
+        #game-container {
+            position: relative;
+            width: 800px;
+            height: 600px;
+            margin: 20px auto;
+            background-image: url('https://www.comicschau.de/wp-content/uploads/2025/12/agartha-meme-trend-tiktok-bedeutung.jpg');
+            background-size: cover;
+            background-position: center;
+            border: 2px solid #000;
+            overflow: hidden;
+        }
+        .penguin {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background-image: url('https://e7.pngegg.com/pngimages/18/190/png-clipart-club-penguin-island-wikia-club-penguin-elite-penguin-force-purple-club-penguin.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            transition: top 0.1s, left 0.1s;
+        }
+        .name-tag {
+            position: absolute;
+            top: -20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 12px;
+            color: #fff;
+            text-shadow: 1px 1px 2px #000;
+        }
+        #chat-container {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            width: 300px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid #000;
+            padding: 10px;
+            overflow-y: scroll;
+        }
+        #chat-input {
+            position: absolute;
+            bottom: 220px;
+            left: 10px;
+            width: 300px;
+        }
     </style>
-    <script src="https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.2/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
-    <div id="game"></div>
-    <input id="chat-input" type="text" placeholder="Type to chat...">
-    <button id="chat-send">Send</button>
+    <div id="game-container">
+        <div id="chat-container"></div>
+        <input type="text" id="chat-input" placeholder="Type to chat...">
+    </div>
 
     <script>
         // Replace with your Firebase config
@@ -32,96 +74,100 @@
             messagingSenderId: "YOUR_SENDER_ID",
             appId: "YOUR_APP_ID"
         };
-
-        const app = firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
+        firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let playerId;
-        let playerRef;
-        let players = {};
-        let playerName = 'Penguin' + Math.floor(Math.random() * 1000); // Random name
+        const playerId = Math.random().toString(36).substr(2, 9); // Unique player ID
+        const playerName = prompt('Enter your penguin name:') || 'Anonymous';
+        const playersRef = db.ref('players');
+        const chatRef = db.ref('chat');
 
-        // Auth anonymously
-        auth.signInAnonymously().catch(console.error);
+        // Local player data
+        let player = {
+            x: 400,
+            y: 300,
+            name: playerName
+        };
 
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                playerId = user.uid;
-                playerRef = db.ref(`players/${playerId}`);
-                playerRef.set({ id: playerId, name: playerName, x: Math.random() * 750, y: Math.random() * 550 });
-                playerRef.onDisconnect().remove();
+        // Create local penguin element
+        const penguinElem = document.createElement('div');
+        penguinElem.className = 'penguin';
+        penguinElem.id = playerId;
+        const nameTag = document.createElement('div');
+        nameTag.className = 'name-tag';
+        nameTag.textContent = playerName;
+        penguinElem.appendChild(nameTag);
+        document.getElementById('game-container').appendChild(penguinElem);
 
-                // Listen for all players
-                db.ref('players').on('value', snapshot => {
-                    players = snapshot.val() || {};
-                    renderPlayers();
-                });
+        // Update position function
+        function updatePosition() {
+            penguinElem.style.left = `${player.x}px`;
+            penguinElem.style.top = `${player.y}px`;
+            playersRef.child(playerId).set(player);
+        }
 
-                // Listen for chats
-                db.ref('chats').on('child_added', snapshot => {
-                    const chat = snapshot.val();
-                    showChatBubble(chat.playerId, chat.message);
-                    setTimeout(() => db.ref(`chats/${snapshot.key}`).remove(), 5000); // Auto-remove after 5s
-                });
+        // Key controls for movement
+        document.addEventListener('keydown', (e) => {
+            const speed = 10;
+            switch (e.key) {
+                case 'ArrowUp': player.y = Math.max(0, player.y - speed); break;
+                case 'ArrowDown': player.y = Math.min(550, player.y + speed); break;
+                case 'ArrowLeft': player.x = Math.max(0, player.x - speed); break;
+                case 'ArrowRight': player.x = Math.min(750, player.x + speed); break;
+            }
+            updatePosition();
+        });
+
+        // Sync other players
+        playersRef.on('value', (snapshot) => {
+            const players = snapshot.val();
+            for (let id in players) {
+                if (id === playerId) continue;
+                let otherElem = document.getElementById(id);
+                if (!otherElem) {
+                    otherElem = document.createElement('div');
+                    otherElem.className = 'penguin';
+                    otherElem.id = id;
+                    const otherNameTag = document.createElement('div');
+                    otherNameTag.className = 'name-tag';
+                    otherElem.appendChild(otherNameTag);
+                    document.getElementById('game-container').appendChild(otherElem);
+                }
+                otherElem.style.left = `${players[id].x}px`;
+                otherElem.style.top = `${players[id].y}px`;
+                otherElem.querySelector('.name-tag').textContent = players[id].name;
             }
         });
 
-        // Movement
-        const speed = 5;
-        document.addEventListener('keydown', e => {
-            if (!playerRef) return;
-            const key = e.key;
-            playerRef.once('value').then(snapshot => {
-                const data = snapshot.val();
-                let x = data.x, y = data.y;
-                if (key === 'ArrowLeft' || key === 'a') x -= speed;
-                if (key === 'ArrowRight' || key === 'd') x += speed;
-                if (key === 'ArrowUp' || key === 'w') y -= speed;
-                if (key === 'ArrowDown' || key === 's') y += speed;
-                x = Math.max(0, Math.min(750, x));
-                y = Math.max(0, Math.min(550, y));
-                playerRef.update({ x, y });
-            });
+        // Remove disconnected players
+        playersRef.on('child_removed', (snapshot) => {
+            const removedElem = document.getElementById(snapshot.key);
+            if (removedElem) removedElem.remove();
         });
 
-        // Chat
-        document.getElementById('chat-send').addEventListener('click', sendChat);
-        document.getElementById('chat-input').addEventListener('keypress', e => {
-            if (e.key === 'Enter') sendChat();
+        // Chat functionality
+        const chatContainer = document.getElementById('chat-container');
+        const chatInput = document.getElementById('chat-input');
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && chatInput.value.trim()) {
+                chatRef.push({ name: playerName, message: chatInput.value });
+                chatInput.value = '';
+            }
         });
 
-        function sendChat() {
-            const message = document.getElementById('chat-input').value.trim();
-            if (message) {
-                db.ref('chats').push({ playerId, message });
-                document.getElementById('chat-input').value = '';
-            }
-        }
+        chatRef.on('child_added', (snapshot) => {
+            const msg = snapshot.val();
+            const msgElem = document.createElement('div');
+            msgElem.textContent = `${msg.name}: ${msg.message}`;
+            chatContainer.appendChild(msgElem);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        });
 
-        function renderPlayers() {
-            const game = document.getElementById('game');
-            game.innerHTML = ''; // Clear
-            Object.values(players).forEach(player => {
-                let elem = document.createElement('div');
-                elem.className = 'player';
-                elem.style.left = `${player.x}px`;
-                elem.style.top = `${player.y}px`;
-                elem.innerHTML = `<img src="https://e7.pngegg.com/pngimages/18/190/png-clipart-club-penguin-island-wikia-club-penguin-elite-penguin-force-purple-club-penguin.png" width="50" height="50" alt="Penguin">
-                                  <div class="chat-bubble" id="bubble-${player.id}"></div>
-                                  <div style="text-align:center; font-size:12px;">${player.name}</div>`;
-                game.appendChild(elem);
-            });
-        }
+        // Clean up on disconnect
+        playersRef.child(playerId).onDisconnect().remove();
 
-        function showChatBubble(id, message) {
-            const bubble = document.getElementById(`bubble-${id}`);
-            if (bubble) {
-                bubble.textContent = message;
-                bubble.style.display = 'block';
-                setTimeout(() => bubble.style.display = 'none', 5000);
-            }
-        }
+        // Initial update
+        updatePosition();
     </script>
 </body>
 </html>
